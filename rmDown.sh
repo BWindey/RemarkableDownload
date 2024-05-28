@@ -31,8 +31,9 @@ EOF
 )"
     for file in "${foundFiles[@]}"; do
         fileId="$(basename ${file%.metadata})"
-        fileName=$(ssh root@10.11.99.1 "grep 'visibleName' ${file}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
-        echo "$fileName"
-        curl --output "${1}_rm/${fileName}.pdf" "http://10.11.99.1/download/${fileId}/placeholder"
+        fileName="$(ssh root@10.11.99.1 \"grep 'visibleName' ${file}\" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')"
+        echo -e "\e[1m${fileName}:\e[0;3m ${fileId}\e[0m"
+        wget -q -O "${1}_rm/${fileName}.pdf" "http://10.11.99.1/download/${fileId}/placeholder"
+        test $? == 0 && echo "  downloaded"
     done
 done
