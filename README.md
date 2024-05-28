@@ -3,6 +3,11 @@ Bash script to download an entire folder from your Remarkable 2 at once.
 This being bash, makes it so this will only work on UNIX-systems, or on WSL if you're on Windows.
 
 
+## How to install
+There are 2 options for now, either you clone this repo on your system, and make a sym-link for rmDown.sh to somewhere in your path (like `~/.local/bin`), 
+or you only download the rmDown.sh script, and put it somewhere in your path.
+
+
 ## How to use
 Connect your tablet via USB to your computer, and type
 ```bash
