@@ -6,28 +6,30 @@ if test -d "${1}_rm"; then
 fi
 
 IFS=$'\n' read -rd '' -a foundDirectories <<< \
-    "$(ssh root@10.11.99.1 bash -s << EOF
-for file in \$(grep -li "visibleName.*${1}" /home/root/.local/share/remarkable/xochitl/*.metadata); do
-    if grep -q "type.*CollectionType" "\$file"; then
-        echo "\$file"
-    fi
-done
+    "$(ssh root@10.11.99.1 bash -s <<- EOF
+        for file in \$(grep -li "visibleName.*${1}" /home/root/.local/share/remarkable/xochitl/*.metadata); do
+            if grep -q "type.*CollectionType" "\$file"; then
+                echo "\$file"
+            fi
+        done
 EOF
 )"
 
 mkdir "${1}_rm"
 
 for entry in "${foundDirectories[@]}"; do
-    id="$(basename ${entry%.metadata})"
-    echo "Directory id: ${id}"
+    directoryId="$(basename ${entry%.metadata})"
+    directoryName=$(ssh root@10.11.99.1 "grep 'visibleName' ${entry}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
+    echo -e "\e[1;4m${directoryName}:\e[0;3m ${directoryId}\e[0m"
+    echo ''
 
     IFS=$'\n' read -rd '' -a foundFiles <<< \
-        "$(ssh root@10.11.99.1 bash -s << EOF
-for file in \$(grep -li "parent\": \"${id}\"" /home/root/.local/share/remarkable/xochitl/*.metadata); do
-    if grep -q "type.*DocumentType" "\$file"; then
-        echo "\$file"
-    fi
-done
+        "$(ssh root@10.11.99.1 bash -s <<- EOF
+            for file in \$(grep -li "parent\": \"${directoryId}\"" /home/root/.local/share/remarkable/xochitl/*.metadata); do
+                if grep -q "type.*DocumentType" "\$file"; then
+                    echo "\$file"
+                fi
+            done
 EOF
 )"
     for file in "${foundFiles[@]}"; do
@@ -35,6 +37,6 @@ EOF
         fileName=$(ssh root@10.11.99.1 "grep 'visibleName' ${file}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
         echo -e "\e[1m${fileName}:\e[0;3m ${fileId}\e[0m"
         wget -q -O "${1}_rm/${fileName}.pdf" "http://10.11.99.1/download/${fileId}/placeholder"
-        test $? == 0 && echo "  downloaded"
+        test $? == 0 && echo -e "  \e[32mdownloaded\e[0m"
     done
 done
