@@ -40,15 +40,8 @@ shift $((OPTIND - 1))
 nameMatch="$1"
 
 # Get all directories that match the name
-IFS=$'\n' read -rd '' -a foundDirectories <<< \
-    "$(ssh root@10.11.99.1 bash -s <<- EOF
-        for file in \$(grep -li "visibleName.*${nameMatch}" /home/root/.local/share/remarkable/xochitl/*.metadata); do
-            if grep -q "type.*CollectionType" "\$file"; then
-                echo "\$file"
-            fi
-        done
-EOF
-)"
+IFS=$'\n' read -rd '' -a foundDirectories < <(ssh root@10.11.99.1 bash -s -- ${nameMatch} <<< \
+        'grep -li "visibleName.*${1}" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*CollectionType" {}')
 
 
 # For every found directory on tablet, make directory matching locally
@@ -78,15 +71,10 @@ for entry in "${foundDirectories[@]}"; do
 
     echo ''
 
-    IFS=$'\n' read -rd '' -a foundFiles <<< \
-        "$(ssh root@10.11.99.1 bash -s <<- EOF
-            for file in \$(grep -li "parent\": \"${directoryId}\"" /home/root/.local/share/remarkable/xochitl/*.metadata); do
-                if grep -q "type.*DocumentType" "\$file"; then
-                    echo "\$file"
-                fi
-            done
-EOF
-)"
+    # Find all files that have as parent the directory, and are DocumentType
+    IFS=$'\n' read -rd '' -a foundFiles < <(ssh root@10.11.99.1 bash -s -- ${directoryId} <<< \
+            'grep -li "parent\": \"${1}\"" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*DocumentType" {}')
+
     for file in "${foundFiles[@]}"; do
         fileId="$(basename ${file%.metadata})"
         fileName=$(ssh root@10.11.99.1 "grep 'visibleName' ${file}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
@@ -97,8 +85,11 @@ EOF
         else
             flags="-q"
         fi
+
+        # "Download" the file from the Remarkable, this will return the pdf
         wget ${flags} -O "${directoryName}_rm/${fileName}.pdf" "http://10.11.99.1/download/${fileId}/placeholder"
         test $? == 0 && echo -e "  \t\e[32mdownloaded\e[0m"
+        test ! $? == 0 && echo -e "  \t\e[31mfailed\e[0m"
     done
 
     # New-line between directories
