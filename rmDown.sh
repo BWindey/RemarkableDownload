@@ -4,6 +4,7 @@ scriptname="$(basename "$0")"
 
 # Default options
 declare -i verbose=0
+declare -i recursive=0
 
 # Error function
 error() {
@@ -12,6 +13,7 @@ error() {
 
 help() {
     echo "Download all files as pdf under the <FOLDER_NAME> folder. <FOLDER_NAME> is matched with regex (grep)."
+    echo "To get the contents of the root-folder (My files), use 'root' as <FOLDER_NAME>."
     echo ""
     echo "Syntax: ${scriptname} [-h] [-v] <FOLDER_NAME>"
     echo ""
@@ -21,11 +23,14 @@ help() {
 }
 
 # Option handling
-while getopts ":vh" opt
+while getopts ":vrh" opt
 do
 	case "${opt}" in
 		v)  verbose=1
 			;;
+        r)  recursive=1
+            echo 'Not yet supported, will continue without recursion'
+            ;;
         h)  help
             exit 0
             ;;
@@ -39,21 +44,31 @@ shift $((OPTIND - 1))
 
 nameMatch="$1"
 
-# Get all directories that match the name
-IFS=$'\n' read -rd '' -a foundDirectories < <(ssh root@10.11.99.1 bash -s -- ${nameMatch} <<< \
-        'grep -li "visibleName.*${1}" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*CollectionType" {}')
+if grep -qi "^root$" <<< "${nameMatch}"; then
+    foundDirectories=( root )
+else
+    # Get all directories that match the name
+    IFS=$'\n' read -rd '' -a foundDirectories < <(ssh root@10.11.99.1 bash -s -- ${nameMatch} <<< \
+            'grep -li "visibleName.*${1}" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*CollectionType" {}')
+fi
 
 
 # For every found directory on tablet, make directory matching locally
 for entry in "${foundDirectories[@]}"; do
-    directoryId="$(basename ${entry%.metadata})"
-    directoryName=$(ssh root@10.11.99.1 "grep 'visibleName' ${entry}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
-
-    echo -en "\e[1;4m${directoryName}\e[0m"
-    if (( verbose == 1 )); then
-        echo -e ":\e[3m ${directoryId}\e[0m"
+    if [[ "$entry" == root ]]; then
+        directoryId=""
+        directoryName="root"
+        echo -e "\e[1;4m${directoryName}\e[0m"
     else
-        echo ''
+        directoryId="$(basename ${entry%.metadata})"
+        directoryName=$(ssh root@10.11.99.1 "grep 'visibleName' ${entry}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
+
+        echo -en "\e[1;4m${directoryName}\e[0m"
+        if (( verbose == 1 )); then
+            echo -e ":\e[3m ${directoryId}\e[0m"
+        else
+            echo ''
+        fi
     fi
 
     # Make directory if didn't exist yet
