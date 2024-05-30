@@ -51,7 +51,7 @@ for entry in "${foundDirectories[@]}"; do
 
     echo -en "\e[1;4m${directoryName}\e[0m"
     if (( verbose == 1 )); then
-        echo ":\e[3m ${directoryId}\e[0m"
+        echo -e ":\e[3m ${directoryId}\e[0m"
     else
         echo ''
     fi
@@ -60,7 +60,7 @@ for entry in "${foundDirectories[@]}"; do
     if ! test -d "${directoryName}_rm"; then
         mkdir "${directoryName}_rm"
     else
-        echo -e "\e[1;33mWarning:\e[0m directory ${directoryName}_rm/ already exists, contents may be overwritten!"
+        echo -e "\e[1;33mWarning:\e[0m directory '${directoryName}_rm/' already exists, contents may be overwritten!"
         read -p "Do you want to continue? [y/n] " -n 1 -r
         echo ''     # new-line
         if [[ ! "$REPLY" =~ ^[Yy]$ ]]; then
@@ -88,8 +88,8 @@ for entry in "${foundDirectories[@]}"; do
 
         # "Download" the file from the Remarkable, this will return the pdf
         wget ${flags} -O "${directoryName}_rm/${fileName}.pdf" "http://10.11.99.1/download/${fileId}/placeholder"
-        test $? == 0 && echo -e "  \t\e[32mdownloaded\e[0m"
-        test ! $? == 0 && echo -e "  \t\e[31mfailed\e[0m"
+        test $? == 0 && echo -e " \e[32mdownloaded\e[0m"
+        test ! $? == 0 && echo -e " \e[31mfailed\e[0m"
     done
 
     # New-line between directories
