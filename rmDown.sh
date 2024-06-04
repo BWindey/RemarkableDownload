@@ -35,7 +35,6 @@ do
 		v)  verbose=1
 			;;
         r)  recursive=1
-            echo 'Not yet supported, will continue without recursion'
             ;;
         h)  help
             exit 0
@@ -99,21 +98,46 @@ for entry in "${foundDirectories[@]}"; do
             'grep -li "parent\": \"${1}\"" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*DocumentType" {}')
 
     for file in "${foundFiles[@]}"; do
-        fileId="$(basename ${file%.metadata})"
-        fileName=$(ssh root@10.11.99.1 "grep 'visibleName' ${file}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
-        echo -en "\e[1m${fileName}: \e[0m"
+        file_id="$(basename ${file%.metadata})"
+        file_name=$(ssh root@10.11.99.1 "grep 'visibleName' ${file}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
+        echo -en "\e[1m${file_name}: \e[0m"
         if (( verbose == 1 )); then
-            echo -e "\e[3m ${fileId}\e[0m"
-            flags="-nv --show-progress"
+            echo -e "\e[3m ${file_id}\e[0m"
+            flags="--no-verbose --show-progress"
         else
-            flags="-q"
+            flags="--quiet"
         fi
 
         # "Download" the file from the Remarkable, this will return the pdf
-        wget ${flags} -O "${directoryName}_rm/${fileName}.pdf" "http://10.11.99.1/download/${fileId}/placeholder"
+        wget ${flags} -O "${directoryName}_rm/${file_name}.pdf" "http://10.11.99.1/download/${file_id}/placeholder"
         test $? == 0 && echo -e " \e[32mdownloaded\e[0m"
         test ! $? == 0 && echo -e " \e[31mfailed\e[0m"
     done
+
+
+    # Handle recursive thing
+    # if (( recursive == 1 )); then
+    #     IFS=$'\n' read -rd '' -a sub_dirs < <(ssh root@10.11.99.1 bash -s -- ${directoryId} <<< \
+    #         'grep -li "parent\": \"${1}\"" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*CollectionType" {}')
+    #
+    #     echo "Initial stack: ${sub_dirs[@]}"
+    #
+    #     # Depth-first search for the recursiveness
+    #     # Can't do recursion I think, so will be using a while-loop with a "simulated" stack
+    #     while [[ "${#sub_dirs[@]}" != 0 ]]; do
+    #         # Take first element of the sub_dirs-stack
+    #         r_dir="${sub_dirs[0]}"
+    #         sub_dirs=("${sub_dirs[@]:1}")
+    #
+    #         r_dir_name=$(ssh root@10.11.99.1 "grep 'visibleName' ${r_dir}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
+    #
+    #         echo "Taken: ${r_dir_name}, ${r_dir}"
+    #         echo "Stack: ${sub_dirs[@]}"
+    #         echo ''
+    #
+    #         r_dir_name=$(ssh root@10.11.99.1 "grep 'visibleName' ${r_dir}")
+    #     done
+    # fi
 
     # New-line between directories
     echo ''
