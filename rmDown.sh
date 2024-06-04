@@ -22,6 +22,12 @@ help() {
     echo "  -h      help, show this message"
 }
 
+# Check if ssh-connection is available
+if ! ssh -q -o ConnectTimeout=1 root@10.11.99.1 'exit'; then
+    echo "Failed to make connection" 1>&2
+    exit 1
+fi
+
 # Option handling
 while getopts ":vrh" opt
 do
@@ -42,6 +48,7 @@ done
 shift $((OPTIND - 1))
 
 
+# Search for directories matching the name
 nameMatch="$1"
 
 if grep -qi "^root$" <<< "${nameMatch}"; then
@@ -55,6 +62,7 @@ fi
 
 # For every found directory on tablet, make directory matching locally
 for entry in "${foundDirectories[@]}"; do
+    # Handle root-directory
     if [[ "$entry" == root ]]; then
         directoryId=""
         directoryName="root"
