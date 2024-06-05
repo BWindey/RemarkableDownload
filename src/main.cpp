@@ -1,12 +1,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-#include "program_options.h"
-
-using json = nlohmann::json;
-
-bool check_ssh_connection();
-void parseMetadata(json j);
+#include "main.h"
 
 
 int main(int argc, char* argv[]) {
@@ -41,8 +36,13 @@ int main(int argc, char* argv[]) {
         return 3;
     }
 
-    json j;
-    parseMetadata(j);
+    json j = parseMetadata();
+    std::unordered_map<std::string, std::vector<rm_file>> temp;
+
+    for (auto &entry : j) {
+        std::cout << entry << '\n';
+    }
+
 
     // De-allocate the memory used in program_options
     program_options::cleanup();
@@ -59,18 +59,23 @@ bool check_ssh_connection() {
     return false;
 }
 
-void parseMetadata(json j) {
-    const char command[] = "ssh root@10.11.99.1 '"
-                           "cat /home/root/.local/share/remarkable/xochitl/*.metadata"
-                           " | sed \"s/}/},/\""
-                           " | sed \"s/ *$//\"'";
+json parseMetadata() {
+    // Get all contents of metadata-files and insert the file-name inside each content
+    const char command[] = R"(ssh root@10.11.99.1 'tail -vn +1 /home/root/.local/share/remarkable/xochitl/*.metadata \
+        | sed "s/==> \(.*\)\.metadata <==.*/{\n\"UUID\": \"\1\",/" \
+        | tr -d "\n" \
+        | tr -s " " \
+        | sed "s/,{/,/g" \
+        | sed "s/}{/}, {/g" \
+        | sed "s/^.*$/[&]/"')";
+
     FILE *stream = popen(command, "r");
     if (stream == nullptr) {
         throw std::runtime_error("Couldn't read files from the tablet");
     }
 
     char buffer[128];
-    std::string result = "[";
+    std::string result;
 
     while(fgets(buffer, sizeof(buffer), stream) != nullptr) {
         result += buffer;
@@ -80,15 +85,9 @@ void parseMetadata(json j) {
     while (isspace(result[i]) != 0) {
         i--;
     }
-    result = result.substr(0, i);
-    result += "]";
-
-    j = json::parse(result);
-
-    for (auto &entry : j) {
-        std::cout << "Visible name: " << entry["visibleName"] << '\n';
-        std::cout << "Type:         " << entry["type"] << "\n\n";
-    }
+    result = result.substr(0, i + 1);
 
     pclose(stream);
+
+    return json::parse(result);
 }

@@ -3,7 +3,6 @@ project(RemarkableDownload)
 
 set(CMAKE_CXX_STANDARD 23)
 
-
 add_executable(RemarkableDownload
         src/main.cpp
         src/program_options.cpp
