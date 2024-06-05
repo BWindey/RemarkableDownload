@@ -4,7 +4,6 @@ scriptname="$(basename "$0")"
 
 # Default options
 declare -i verbose=0
-declare -i recursive=0
 
 # Error function
 error() {
@@ -29,16 +28,14 @@ if ! ssh -q -o ConnectTimeout=1 root@10.11.99.1 'exit'; then
 fi
 
 # Option handling
-while getopts ":vrh" opt
+while getopts ":vh" opt
 do
 	case "${opt}" in
 		v)  verbose=1
 			;;
-        r)  recursive=1
-            ;;
-        h)  help
-            exit 0
-            ;;
+    h)  help
+        exit 0
+      ;;
 		\?) error 1
 			;;
 	esac
@@ -67,8 +64,8 @@ for entry in "${foundDirectories[@]}"; do
         directoryName="root"
         echo -e "\e[1;4m${directoryName}\e[0m"
     else
-        directoryId="$(basename ${entry%.metadata})"
-        directoryName=$(ssh root@10.11.99.1 "grep 'visibleName' ${entry}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
+        directoryId="$(basename "${entry%.metadata}")"
+        directoryName=$(ssh root@10.11.99.1 "grep 'visibleName' \"${entry}\"" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
 
         echo -en "\e[1;4m${directoryName}\e[0m"
         if (( verbose == 1 )); then
@@ -94,11 +91,11 @@ for entry in "${foundDirectories[@]}"; do
     echo ''
 
     # Find all files that have as parent the directory, and are DocumentType
-    IFS=$'\n' read -rd '' -a foundFiles < <(ssh root@10.11.99.1 bash -s -- ${directoryId} <<< \
+    IFS=$'\n' read -rd '' -a foundFiles < <(ssh root@10.11.99.1 bash -s -- "${directoryId}" <<< \
             'grep -li "parent\": \"${1}\"" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*DocumentType" {}')
 
     for file in "${foundFiles[@]}"; do
-        file_id="$(basename ${file%.metadata})"
+        file_id="$(basename "${file%.metadata}")"
         file_name=$(ssh root@10.11.99.1 "grep 'visibleName' ${file}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
         echo -en "\e[1m${file_name}: \e[0m"
         if (( verbose == 1 )); then
@@ -109,35 +106,10 @@ for entry in "${foundDirectories[@]}"; do
         fi
 
         # "Download" the file from the Remarkable, this will return the pdf
-        wget ${flags} -O "${directoryName}_rm/${file_name}.pdf" "http://10.11.99.1/download/${file_id}/placeholder"
+        wget "${flags}" -O "${directoryName}_rm/${file_name}.pdf" "http://10.11.99.1/download/${file_id}/placeholder"
         test $? == 0 && echo -e " \e[32mdownloaded\e[0m"
         test ! $? == 0 && echo -e " \e[31mfailed\e[0m"
     done
-
-
-    # Handle recursive thing
-    # if (( recursive == 1 )); then
-    #     IFS=$'\n' read -rd '' -a sub_dirs < <(ssh root@10.11.99.1 bash -s -- ${directoryId} <<< \
-    #         'grep -li "parent\": \"${1}\"" /home/root/.local/share/remarkable/xochitl/*.metadata | xargs -I {} grep -l "type.*CollectionType" {}')
-    #
-    #     echo "Initial stack: ${sub_dirs[@]}"
-    #
-    #     # Depth-first search for the recursiveness
-    #     # Can't do recursion I think, so will be using a while-loop with a "simulated" stack
-    #     while [[ "${#sub_dirs[@]}" != 0 ]]; do
-    #         # Take first element of the sub_dirs-stack
-    #         r_dir="${sub_dirs[0]}"
-    #         sub_dirs=("${sub_dirs[@]:1}")
-    #
-    #         r_dir_name=$(ssh root@10.11.99.1 "grep 'visibleName' ${r_dir}" | sed 's/.*"\([^"]*\)"[, ]*$/\1/')
-    #
-    #         echo "Taken: ${r_dir_name}, ${r_dir}"
-    #         echo "Stack: ${sub_dirs[@]}"
-    #         echo ''
-    #
-    #         r_dir_name=$(ssh root@10.11.99.1 "grep 'visibleName' ${r_dir}")
-    #     done
-    # fi
 
     # New-line between directories
     echo ''
