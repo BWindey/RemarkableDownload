@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(RemarkableDownload
         src/main.cpp
         src/program_options.cpp
+        src/ssh_stuff.cpp
 )
 
 target_compile_features(RemarkableDownload PUBLIC cxx_std_23)

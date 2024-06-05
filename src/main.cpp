@@ -37,12 +37,17 @@ int main(int argc, char* argv[]) {
     }
 
     json j = parseMetadata();
-    std::unordered_map<std::string, std::vector<rm_file>> temp;
+    std::unordered_map<std::string, std::vector<rm_file>> file_parent_map;
 
-    for (auto &entry : j) {
-        std::cout << entry << '\n';
+    for (const auto &entry : j) {
+        rm_file file;
+        file.UUID           = entry["UUID"];
+        file.parent_UUID    = entry["parent"];
+        file.visible_name   = entry["visibleName"];
+        file.is_folder      = (entry["type"] == "CollectionType");
+
+        file_parent_map[file.parent_UUID].push_back(std::move(file));
     }
-
 
     // De-allocate the memory used in program_options
     program_options::cleanup();
@@ -51,43 +56,3 @@ int main(int argc, char* argv[]) {
 }
 
 
-bool check_ssh_connection() {
-    int returnCode = system("ssh -q -o ConnectTimeout=1 root@10.11.99.1 'exit'");
-    if (returnCode == 0) {
-        return true;
-    }
-    return false;
-}
-
-json parseMetadata() {
-    // Get all contents of metadata-files and insert the file-name inside each content
-    const char command[] = R"(ssh root@10.11.99.1 'tail -vn +1 /home/root/.local/share/remarkable/xochitl/*.metadata \
-        | sed "s/==> \(.*\)\.metadata <==.*/{\n\"UUID\": \"\1\",/" \
-        | tr -d "\n" \
-        | tr -s " " \
-        | sed "s/,{/,/g" \
-        | sed "s/}{/}, {/g" \
-        | sed "s/^.*$/[&]/"')";
-
-    FILE *stream = popen(command, "r");
-    if (stream == nullptr) {
-        throw std::runtime_error("Couldn't read files from the tablet");
-    }
-
-    char buffer[128];
-    std::string result;
-
-    while(fgets(buffer, sizeof(buffer), stream) != nullptr) {
-        result += buffer;
-    }
-
-    unsigned long i = result.length() - 1;
-    while (isspace(result[i]) != 0) {
-        i--;
-    }
-    result = result.substr(0, i + 1);
-
-    pclose(stream);
-
-    return json::parse(result);
-}
