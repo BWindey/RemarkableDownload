@@ -5,9 +5,8 @@ namespace program_options {
 
     bool verbose();
     bool recursive();
-    bool help();
-
     char* dir_name();
 
+    void help(const char* program_name);
     void cleanup();
 };

@@ -6,7 +6,6 @@
 namespace {
     bool _verbose = false;
     bool _recursive = false;
-    bool _help = false;
 
     char* _dir_name = nullptr;
 }
@@ -21,17 +20,14 @@ void program_options::parse(int argc, char **argv) {
                 switch (*argument) {
                     case 'v':
                         _verbose = true;
-                        std::cout << "Verbose is set to true\n";
                         break;
 
                     case 'r':
                         _recursive = true;
-                        std::cout << "Recursive is set to true\n";
                         break;
 
                     case 'h':
-                        _help = true;
-                        std::cout << "Help is set to true\n";
+                        program_options::help(argv[0]);
                         break;
                 }
 
@@ -59,12 +55,21 @@ bool program_options::recursive() {
     return _recursive;
 }
 
-bool program_options::help() {
-    return _help;
-}
-
 char* program_options::dir_name() {
     return _dir_name;
+}
+
+void program_options::help(const char* program_name) {
+    std::cout <<
+              "Download all files as pdf under the <FOLDER_NAME> folder. <FOLDER_NAME> is matched with regex (grep).\n"
+              "To get the contents of the root-folder (My files), use 'root' as <FOLDER_NAME>.\n"
+              "\n"
+              "Syntax: " << program_name << "[-h] [-r] [-v] <FOLDER_NAME>\n"
+                                            "\n"
+                                            "options:\n"
+                                            "  -v      verbose, display file-id's and wget output\n"
+                                            "  -h      help, show this message\n";
+    exit(0);
 }
 
 void program_options::cleanup() {
