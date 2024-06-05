@@ -1,5 +1,4 @@
 #include <iostream>
-#include <unordered_map>
 
 #include "program_options.h"
 
@@ -13,17 +12,20 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (program_options::verbose()) {
-        std::cout << "Main function found verbose\n";
-    }
-
-    if (program_options::recursive()) {
-        std::cout << "Main function found recursive\n";
-    }
-
     if (program_options::help()) {
-        std::cout << "Main function found help\n";
+        std::cout <<
+            "Download all files as pdf under the <FOLDER_NAME> folder. <FOLDER_NAME> is matched with regex (grep).\n"
+            "To get the contents of the root-folder (My files), use 'root' as <FOLDER_NAME>.\n"
+            "\n"
+            "Syntax: " << argv[0] << "[-h] [-r] [-v] <FOLDER_NAME>\n"
+            "\n"
+            "options:\n"
+            "  -v      verbose, display file-id's and wget output\n"
+            "  -h      help, show this message\n";
     }
+
+    // De-allocate the memory used in program_options
+    program_options::cleanup();
 
     return 0;
 }
