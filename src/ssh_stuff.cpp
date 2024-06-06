@@ -11,7 +11,7 @@ bool check_ssh_connection() {
 json parseMetadata() {
     // Get all contents of metadata-files and insert the file-name inside each content
     const char command[] = R"(ssh root@10.11.99.1 'tail -vn +1 /home/root/.local/share/remarkable/xochitl/*.metadata \
-        | sed "s/==> \(.*\)\.metadata <==.*/{\n\"UUID\": \"\1\",/" \
+        | sed "s/==> \/home.*xochitl\/\(.*\)\.metadata <==.*/{\n\"UUID\": \"\1\",/" \
         | tr -d "\n" \
         | tr -s " " \
         | sed "s/,{/,/g" \
