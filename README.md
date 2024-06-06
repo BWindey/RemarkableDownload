@@ -20,8 +20,9 @@ use the bash-script. If you want recursive behaviour, then you'll need to use th
 ## How to use (bash-script)
 Connect your tablet via USB to your computer, and make sure to have installed ssh-keys: 
 https://remarkable.guide/guide/access/ssh.html
+On your Remarkable, go to `settings > storage` and enable the USB web interface.
 
-Now you can use the command as follows
+Now you can use the command on your pc as follows
 ```bash
 rmDown [-h] [-v] <folder>
 ```
