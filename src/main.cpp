@@ -22,14 +22,16 @@ int main(int argc, char *argv[]) {
 
     // Check if we can execute shell-commands (ssh later)
     if (!system(nullptr)) {
-        std::cerr << "Cannot execute commands\n";
+        std::cerr << "Cannot execute commands\n"
+                     "Exiting\n";
         return 2;
     }
 
     // Check if ssh-connection can be made
     if (!check_ssh_connection()) {
         std::cerr << "No ssh-connection could be established.\n"
-                "Ensure you are connected via USB and the tablet is on.\n";
+                "Ensure you are connected via USB and the tablet is on.\n"
+                "Exiting\n";
         return 3;
     }
 
@@ -59,15 +61,26 @@ int main(int argc, char *argv[]) {
         }
         if (!std::ranges::search(file.visible_name, name_to_search, case_insensitive_compare).empty()) {
             found_directories.push_back(file);
-            std::cout << "Found directory: " << file.visible_name << '\n';
         }
     }
 
     // For each file in found_files, download it through http-request
+    /*
+     * TODO:
+     *  - add extra new-line between directories
+     *  - add confirmation when multiple directories
+     *  - recursive
+     */
     for (const rm_file &directory: found_directories) {
         // Make directory for the files
         std::string directory_name = directory.visible_name;
         directory_name += "_rm/";
+
+        std::cout << "\033[1;4mDirectory '" << directory.visible_name << "':\033[0m ";
+        if (program_options::verbose()) {
+            std::cout << "\033[3m" << directory.UUID << "\033[0m";
+        }
+        std::cout << std::endl;
 
         std::string command = "mkdir '";
         command += directory_name;
@@ -75,13 +88,14 @@ int main(int argc, char *argv[]) {
 
         // Warn user if directory already exists
         if (system(command.c_str()) != 0) {
-            std::cout << "Directory '" << directory_name
-                << "' already exists. Files on the remarkable with the same name as in that directory "
-                   "(+ .pdf-extenstion) WILL get overwritten!\n";
-            std::cout << "Do you want to proceed? [y/n]: ";
+            std::cout << "\033[1;33mWarning:\033[0m directory '"
+                    << directory_name
+                    << "' already exists, contents may be overwritten!\n";
+            std::cout << "Do you want to continue? [y/n]: ";
             char input;
             std::cin >> input;
             if (input != 'y' && input != 'Y') {
+                std::cout << "Skipping this directory\n";
                 continue;
             }
         }
@@ -93,7 +107,11 @@ int main(int argc, char *argv[]) {
                 continue;
             }
 
-            std::cout << "Downloading " << file.visible_name << '\n';
+            std::cout << "- \033[1m" << file.visible_name << "\033[0m: ";
+
+            if (program_options::verbose()) {
+                std::cout << "\033[3m" << file.UUID << "\033[3m\n";
+            }
 
             std::string url = "http://10.11.99.1/download/";
             url += file.UUID;
@@ -103,9 +121,10 @@ int main(int argc, char *argv[]) {
                 cpr::Url{url}
             );
             if (response.status_code != 200) {
-                std::cerr << "Couldn't download file: " << file.visible_name << ", " << file.UUID << '\n';
+                std::cerr << " \033[31mfailed\033[0m\n";
                 continue;
             }
+            std::cout << " \033[32mdownloaded\033[0m\n";
 
             std::string output_file_name = directory_name;
             output_file_name += file.visible_name;
@@ -116,7 +135,6 @@ int main(int argc, char *argv[]) {
             out.close();
         }
     }
-
 
     // De-allocate the memory used in program_options
     program_options::cleanup();
