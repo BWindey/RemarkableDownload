@@ -69,18 +69,24 @@ void download_directory(const rm_file &directory,
         return;
     }
 
+    std::vector<rm_file> found_folders;
     // For every file that has the directory of this parent, download it
     for (const rm_file &file: file_relations_map.at(directory.UUID)) {
         if (file.is_folder) {
             if (program_options::recursive()) {
-                std::string recusive_dir_name = directory_name;
-                recusive_dir_name += file.visible_name;
-                recusive_dir_name += "_rm/";
-
-                download_directory(file, file_relations_map, recusive_dir_name);
+                found_folders.push_back(file);
             }
         } else {
             download_file(file, directory_name);
         }
+    }
+
+    // Recursively download the found folders
+    for (const rm_file &file: found_folders) {
+        std::string recusive_dir_name = directory_name;
+        recusive_dir_name += file.visible_name;
+        recusive_dir_name += "_rm/";
+
+        download_directory(file, file_relations_map, recusive_dir_name);
     }
 }
