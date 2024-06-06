@@ -19,6 +19,7 @@ bool create_directory(const std::string &dir_name) {
         std::cout << "Do you want to continue? [y/n]: ";
         char input;
         std::cin >> input;
+        std::cin.clear();
         if (input != 'y' && input != 'Y') {
             std::cout << "Skipping this directory\n";
             return false;

@@ -76,6 +76,16 @@ int main(int argc, char *argv[]) {
      *  - add confirmation when multiple directories
      */
     for (int i = 0; i < found_directories.size(); i++) {
+        if (!program_options::no_confirm_dir()) {
+            std::cout << "Download " << found_directories.at(i).visible_name << "? [y/n]: ";
+            char answer;
+            std::cin >> answer;
+            std::cin.clear();
+            if (answer != 'y') {
+                std::cout << "Skipping directory\n";
+                continue;
+            }
+        }
         std::string dir_name = found_directories.at(i).visible_name;
         dir_name += "_rm/";
 

@@ -6,6 +6,7 @@
 namespace {
     bool _verbose = false;
     bool _recursive = false;
+    bool _no_confirm_dir = false;
 
     char* _dir_name = nullptr;
 }
@@ -26,9 +27,16 @@ void program_options::parse(int argc, char **argv) {
                         _recursive = true;
                         break;
 
-                    case 'h':
-                        program_options::help(argv[0]);
+                    case 'n':
+                        _no_confirm_dir = true;
                         break;
+
+                    case 'h':
+                        help(argv[0]);
+                        break;
+
+                    default:
+                        std::cout << "Option '" << *argument << "' is not valid.\n";
                 }
 
                 argument++;
@@ -37,7 +45,7 @@ void program_options::parse(int argc, char **argv) {
             // Ensure there is only 1 name specified.
             // This could in the future be expanded, but for now this is a good safe starting-point.
             if (assigned_dir_name) {
-                program_options::cleanup();
+                cleanup();
                 throw std::runtime_error("Can only handle one directory at a time.");
             }
             _dir_name = new char[std::strlen(argument) + 1];
@@ -54,6 +62,11 @@ bool program_options::verbose() {
 bool program_options::recursive() {
     return _recursive;
 }
+
+bool program_options::no_confirm_dir() {
+    return _no_confirm_dir;
+}
+
 
 char* program_options::dir_name() {
     return _dir_name;
