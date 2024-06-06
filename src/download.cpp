@@ -91,3 +91,33 @@ void download_directory(const rm_file &directory,
         download_directory(file, file_relations_map, recusive_dir_name, cout_prefix + "  ");
     }
 }
+
+
+void download_root(const std::unordered_map<std::string, std::vector<rm_file> > &file_relations_map) {
+    std::cout << "\033[1;4mDirectory '" << "root" << "':\033[0m\n";
+
+    if (!create_directory("root_rm/")) {
+        return;
+    }
+
+    std::vector<rm_file> found_folders;
+    // For every file that has the directory of this parent, download it
+    for (const rm_file &file: file_relations_map.at("")) {
+        if (file.is_folder) {
+            if (program_options::recursive()) {
+                found_folders.push_back(file);
+            }
+        } else {
+            download_file(file, "root_rm/", "");
+        }
+    }
+
+    // Recursively download the found folders
+    for (const rm_file &file: found_folders) {
+        std::string recusive_dir_name = "root_rm/";
+        recusive_dir_name += file.visible_name;
+        recusive_dir_name += "_rm/";
+
+        download_directory(file, file_relations_map, recusive_dir_name, "  ");
+    }
+}

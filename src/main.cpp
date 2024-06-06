@@ -54,6 +54,13 @@ int main(int argc, char *argv[]) {
     std::string name_to_search = program_options::dir_name();
     std::vector<rm_file> found_directories;
 
+    // There isn't a folder called "root", but we know which those are by looking at which files
+    // have parent-UUID = ""
+    if (name_to_search == "root") {
+        download_root(file_relations_map);
+        return 0;
+    }
+
     for (const rm_file &file: all_files_set) {
         if (!file.is_folder) {
             continue;
