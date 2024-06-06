@@ -28,7 +28,7 @@ bool create_directory(const std::string &dir_name) {
 }
 
 void download_file(const rm_file &file, const std::string &directory_name) {
-    std::cout << "- \033[1m" << file.visible_name << "\033[0m: ";
+    std::cout << "- \033[1m" << file.visible_name << "\033[0m: " << std::flush;
 
     if (program_options::verbose()) {
         std::cout << "\033[3m" << file.UUID << "\033[3m\n";
