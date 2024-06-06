@@ -28,40 +28,38 @@ bool create_directory(const std::string &dir_name) {
 }
 
 void download_file(const rm_file &file, const std::string &directory_name) {
-        std::cout << "- \033[1m" << file.visible_name << "\033[0m: ";
+    std::cout << "- \033[1m" << file.visible_name << "\033[0m: ";
 
-        if (program_options::verbose()) {
-            std::cout << "\033[3m" << file.UUID << "\033[3m\n";
-        }
+    if (program_options::verbose()) {
+        std::cout << "\033[3m" << file.UUID << "\033[3m\n";
+    }
 
-        std::string url = "http://10.11.99.1/download/";
-        url += file.UUID;
-        url += "/placeholder";
+    std::string url = "http://10.11.99.1/download/";
+    url += file.UUID;
+    url += "/placeholder";
 
-        const cpr::Response response = Get(
-            cpr::Url{url}
-        );
-        if (response.status_code != 200) {
-            std::cerr << " \033[31mfailed\033[0m\n";
-            return;
-        }
-        std::cout << " \033[32mdownloaded\033[0m\n";
+    const cpr::Response response = Get(
+        cpr::Url{url}
+    );
+    if (response.status_code != 200) {
+        std::cerr << " \033[31mfailed\033[0m\n";
+        return;
+    }
+    std::cout << " \033[32mdownloaded\033[0m\n";
 
-        std::string output_file_name = directory_name;
-        output_file_name += file.visible_name;
-        output_file_name += ".pdf";
+    std::string output_file_name = directory_name;
+    output_file_name += file.visible_name;
+    output_file_name += ".pdf";
 
-        std::ofstream out(output_file_name, std::ios::binary);
-        out << response.text;
-        out.close();
+    std::ofstream out(output_file_name, std::ios::binary);
+    out << response.text;
+    out.close();
 }
 
-void download_directory(const rm_file &directory, std::unordered_map<std::string, std::vector<rm_file>> &file_relations_map) {
-    // Make directory for the files
-    std::string directory_name = directory.visible_name;
-    directory_name += "_rm/";
-
-    std::cout << "\033[1;4mDirectory '" << directory.visible_name << "':\033[0m ";
+void download_directory(const rm_file &directory,
+                        const std::unordered_map<std::string, std::vector<rm_file> > &file_relations_map,
+                        const std::string &directory_name) {
+    std::cout << "\033[1;4mDirectory '" << directory_name << "':\033[0m ";
     if (program_options::verbose()) {
         std::cout << "\033[3m" << directory.UUID << "\033[0m";
     }
@@ -72,11 +70,17 @@ void download_directory(const rm_file &directory, std::unordered_map<std::string
     }
 
     // For every file that has the directory of this parent, download it
-    for (const rm_file &file: file_relations_map[directory.UUID]) {
+    for (const rm_file &file: file_relations_map.at(directory.UUID)) {
         if (file.is_folder) {
-            // for now
-            continue;
+            if (program_options::recursive()) {
+                std::string recusive_dir_name = directory_name;
+                recusive_dir_name += file.visible_name;
+                recusive_dir_name += "_rm/";
+
+                download_directory(file, file_relations_map, recusive_dir_name);
+            }
+        } else {
+            download_file(file, directory_name);
         }
-        download_file(file, directory_name);
     }
 }

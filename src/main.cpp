@@ -71,7 +71,10 @@ int main(int argc, char *argv[]) {
      *  - recursive
      */
     for (int i = 0; i < found_directories.size(); i++) {
-        download_directory(found_directories.at(i), file_relations_map);
+        std::string dir_name = found_directories.at(i).visible_name;
+        dir_name += "_rm/";
+
+        download_directory(found_directories.at(i), file_relations_map, dir_name);
         if (i + 1 < found_directories.size()) {
             std::cout << std::endl;
         }
