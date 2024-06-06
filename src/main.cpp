@@ -73,9 +73,7 @@ int main(int argc, char *argv[]) {
     // For each file in found_files, download it through http-request
     /*
      * TODO:
-     *  - add extra new-line between directories
      *  - add confirmation when multiple directories
-     *  - recursive
      */
     for (int i = 0; i < found_directories.size(); i++) {
         std::string dir_name = found_directories.at(i).visible_name;

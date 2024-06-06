@@ -28,11 +28,13 @@ bool create_directory(const std::string &dir_name) {
 }
 
 void download_file(const rm_file &file, const std::string &directory_name, const std::string &cout_prefix) {
-    std::cout << cout_prefix << " - \033[1m" << file.visible_name << "\033[0m: " << std::flush;
+    std::cout << cout_prefix << " - \033[1m" << file.visible_name << "\033[0m: ";
 
     if (program_options::verbose()) {
         std::cout << "\033[3m" << file.UUID << "\033[3m";
     }
+
+    std::cout << std::flush;
 
     std::string url = "http://10.11.99.1/download/";
     url += file.UUID;
