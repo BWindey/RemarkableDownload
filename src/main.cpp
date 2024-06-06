@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         std::string dir_name = found_directories.at(i).visible_name;
         dir_name += "_rm/";
 
-        download_directory(found_directories.at(i), file_relations_map, dir_name);
+        download_directory(found_directories.at(i), file_relations_map, dir_name, "");
         if (i + 1 < found_directories.size()) {
             std::cout << std::endl;
         }

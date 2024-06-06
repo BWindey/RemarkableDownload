@@ -27,11 +27,11 @@ bool create_directory(const std::string &dir_name) {
     return true;
 }
 
-void download_file(const rm_file &file, const std::string &directory_name) {
-    std::cout << "- \033[1m" << file.visible_name << "\033[0m: " << std::flush;
+void download_file(const rm_file &file, const std::string &directory_name, const std::string &cout_prefix) {
+    std::cout << cout_prefix << " - \033[1m" << file.visible_name << "\033[0m: " << std::flush;
 
     if (program_options::verbose()) {
-        std::cout << "\033[3m" << file.UUID << "\033[3m\n";
+        std::cout << "\033[3m" << file.UUID << "\033[3m";
     }
 
     std::string url = "http://10.11.99.1/download/";
@@ -58,8 +58,9 @@ void download_file(const rm_file &file, const std::string &directory_name) {
 
 void download_directory(const rm_file &directory,
                         const std::unordered_map<std::string, std::vector<rm_file> > &file_relations_map,
-                        const std::string &directory_name) {
-    std::cout << "\033[1;4mDirectory '" << directory_name << "':\033[0m ";
+                        const std::string &directory_name,
+                        const std::string &cout_prefix) {
+    std::cout << cout_prefix << "\033[1;4mDirectory '" << directory_name << "':\033[0m ";
     if (program_options::verbose()) {
         std::cout << "\033[3m" << directory.UUID << "\033[0m";
     }
@@ -77,7 +78,7 @@ void download_directory(const rm_file &directory,
                 found_folders.push_back(file);
             }
         } else {
-            download_file(file, directory_name);
+            download_file(file, directory_name, cout_prefix);
         }
     }
 
@@ -87,6 +88,6 @@ void download_directory(const rm_file &directory,
         recusive_dir_name += file.visible_name;
         recusive_dir_name += "_rm/";
 
-        download_directory(file, file_relations_map, recusive_dir_name);
+        download_directory(file, file_relations_map, recusive_dir_name, cout_prefix + "  ");
     }
 }
