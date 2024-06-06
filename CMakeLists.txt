@@ -12,6 +12,7 @@ add_executable(RemarkableDownload
         src/main.cpp
         src/program_options.cpp
         src/ssh_stuff.cpp
+        src/download.cpp
 )
 
 target_compile_features(RemarkableDownload PUBLIC cxx_std_23)

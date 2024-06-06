@@ -1,6 +1,9 @@
 #pragma once
 
 #include "program_options.h"
+#include <iostream>
+#include <unordered_set>
+#include <cpr/cpr.h>
 #include "ssh_stuff.h"
 
 using json = nlohmann::json;
