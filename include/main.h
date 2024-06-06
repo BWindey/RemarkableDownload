@@ -10,5 +10,16 @@ struct rm_file {
     std::string parent_UUID;
     bool is_folder;
     std::string visible_name;
+
+    bool operator==(const rm_file &file) const {
+        return UUID == file.UUID;
+    }
 };
 
+struct rm_file_hash {
+    size_t operator()(const rm_file &file) const {
+        return std::hash<std::string>()(file.UUID);
+    }
+};
+
+bool case_insensitive_compare(char a, char b);
