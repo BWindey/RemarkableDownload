@@ -12,7 +12,7 @@ error() {
 
 help() {
     echo "Upload the <FILE_NAME> to the remarkable."
-    echo "The new file will be placed in the current open directory on your tablet."
+    echo "The new file will be placed somewhere, I don't seem to be able to control where..."
     echo ""
     echo "Syntax: ${scriptname} [-h] [-v] <FILE_NAME>"
     echo ""
