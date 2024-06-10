@@ -17,6 +17,7 @@ void program_options::parse(int argc, char **argv) {
     for (int i = 1; i < argc; i++) {
         char* argument = argv[i];
         if (argument[0] == '-') {
+            argument++;
             while(*argument != '\0') {
                 switch (*argument) {
                     case 'v':
