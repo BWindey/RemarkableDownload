@@ -1,8 +1,5 @@
 #pragma once
 
-#include "program_options.h"
-#include <iostream>
-#include <unordered_set>
 #include <cpr/cpr.h>
 #include "ssh_stuff.h"
 
@@ -19,10 +16,5 @@ struct rm_file {
     }
 };
 
-struct rm_file_hash {
-    size_t operator()(const rm_file &file) const {
-        return std::hash<std::string>()(file.UUID);
-    }
-};
-
+bool contains(const std::string &s1, const std::string &s2);
 bool case_insensitive_compare(char a, char b);

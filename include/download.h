@@ -1,5 +1,7 @@
 #pragma once
-#include <main.h>
+#include "main.h"
+
+void download_file(const rm_file &file, const std::string &directory_name, const std::string &cout_prefix);
 
 void download_directory(
     const rm_file &directory,

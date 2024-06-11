@@ -3,6 +3,7 @@
 namespace program_options {
     void parse(int argc, char* argv[]);
 
+    bool file();
     bool verbose();
     bool recursive();
     bool no_confirm_dir();

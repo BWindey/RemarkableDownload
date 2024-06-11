@@ -1,4 +1,7 @@
 #include "download.h"
+#include "program_options.h"
+
+#include <iostream>
 
 
 bool create_directory(const std::string &dir_name) {
@@ -52,7 +55,9 @@ void download_file(const rm_file &file, const std::string &directory_name, const
 
     std::string output_file_name = directory_name;
     output_file_name += file.visible_name;
-    output_file_name += ".pdf";
+    if (!file.visible_name.ends_with(".pdf")) {
+        output_file_name += ".pdf";
+    }
 
     std::ofstream out(output_file_name, std::ios::binary);
     out << response.text;
