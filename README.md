@@ -44,6 +44,8 @@ The C++ binary does have an extra `-r` flag, which downloads all the subfolders 
 This recursive mode will create a traditional file-structure on your pc, 
 where each sub-folder will also have the '_rm' postfix.
 
+There is also an extra '-f' flag, which will download single files instead of entire folders.
+
 
 ## How to install (bash-script)
 There are 2 options for now, either you clone this repo on your system, and make a sym-link for rmDown.sh to somewhere in your path (like `~/.local/bin`), 
