@@ -47,12 +47,14 @@ if [[ ! -e "$1" ]]; then
     error 3
 fi
 
-flags=""
 if (( verbose == 1)); then
-    flags="--verbose"
+    curl --connect-timeout 1 "--verbose" \
+    -H "Content-Type: multipart/form-data" \
+    -F "file=@$(realpath "$1")" \
+    "http://10.11.99.1/upload"
 fi
 
-curl --connect-timeout 1 "${flags}" \
+curl --connect-timeout 1 \
     -H "Content-Type: multipart/form-data" \
     -F "file=@$(realpath "$1")" \
     "http://10.11.99.1/upload"
