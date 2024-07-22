@@ -11,13 +11,13 @@ int main(const int argc, char *argv[]) {
         program_options::parse(argc, argv);
     } catch (const std::exception &x) {
         std::cerr << x.what() << '\n';
-        std::cerr << "Usage: " << argv[0] << "[-h] [-f] [-r] [-v] <FOLDER_NAME>\n";
+        std::cerr << "Usage: " << argv[0] << " [-h] [-f] [-r] [-v] <FOLDER_NAME>\n";
         return 1;
     }
 
     // Check if there was a directory-name given
     if (program_options::dir_name() == nullptr) {
-        std::cerr << "Usage: " << argv[0] << "[-h] [-f] [-r] [-v] <FOLDER_NAME>\n";
+        std::cerr << "Usage: " << argv[0] << " [-h] [-f] [-r] [-v] <FOLDER_NAME>\n";
         return 1;
     }
 
