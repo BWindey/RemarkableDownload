@@ -52,9 +52,13 @@ if (( verbose == 1)); then
     -H "Content-Type: multipart/form-data" \
     -F "file=@$(realpath "$1")" \
     "http://10.11.99.1/upload"
+
+else 
+	curl --connect-timeout 1 \
+		-H "Content-Type: multipart/form-data" \
+		-F "file=@$(realpath "$1")" \
+		"http://10.11.99.1/upload"
 fi
 
-curl --connect-timeout 1 \
-    -H "Content-Type: multipart/form-data" \
-    -F "file=@$(realpath "$1")" \
-    "http://10.11.99.1/upload"
+# Newline cause it's prettier
+echo ''
