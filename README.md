@@ -32,8 +32,11 @@ This will create a new folder called `<folder>_rm/`, and it will put all documen
 If the `<folder>_rm/` directory already exists in your current working directory, then the script will ask for 
 confirmation, as it is possible that the script would overwrite already existing files.
 
+The `-f` flag downloads single files matching the given name\
 The `-h` flag prints a help-message and exits without actually downloading.\
 The `-v` flag turns on verbose mode, which prints each file's UUID alongside its name.
+The `-r` flag will enable recursive downloading of
+subdirectories.
 
 
 ## How to use (C++ binary)
