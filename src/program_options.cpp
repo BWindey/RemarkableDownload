@@ -85,7 +85,7 @@ char* program_options::dir_name() {
 
 void program_options::help(const char* program_name) {
     std::cout <<
-              "Download all files as pdf under the <FOLDER_NAME> folder. <FOLDER_NAME> is matched with regex (grep).\n"
+              "Download all files as pdf under the <FOLDER_NAME> folder. <FOLDER_NAME> is matched case-insensitive with regex (grep).\n"
               "To get the contents of the root-folder (My files), use 'root' as <FOLDER_NAME>.\n"
               "\n"
               "Syntax: " << program_name << " [-h] [-f] [-r] [-v] <FOLDER_NAME>\n"
@@ -93,6 +93,7 @@ void program_options::help(const char* program_name) {
                                             "options:\n"
                                             "  -f      file, download single files matching the name\n"
                                             "  -v      verbose, display file-id's and wget output\n"
+                                            "  -r      recursive, recursively download file in subfolders\n"
                                             "  -h      help, show this message\n";
     exit(0);
 }
