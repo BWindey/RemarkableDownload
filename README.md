@@ -34,9 +34,14 @@ confirmation, as it is possible that the script would overwrite already existing
 
 The `-f` flag downloads single files matching the given name\
 The `-h` flag prints a help-message and exits without actually downloading.\
-The `-v` flag turns on verbose mode, which prints each file's UUID alongside its name.
-The `-r` flag will enable recursive downloading of
-subdirectories.
+The `-v` flag turns on verbose mode, which prints each file's UUID alongside its name.\
+The `-r` flag will enable recursive downloading of subdirectories.
+
+It is also possible to use the `-help` flag:
+
+```bash
+rmDown -help
+```
 
 
 ## How to use (C++ binary)
